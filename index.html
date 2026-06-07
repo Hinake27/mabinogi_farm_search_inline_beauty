@@ -1,281 +1,789 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>瑪奇農場模型｜素質搜尋（美化版）</title>
-<style>
-  :root {
-    /* Autumn vibes */
-    --bg-top:#0b0c0f; --bg-btm:#11131a;
-    --panel:#13161f; --card:#161a24;
-    --muted:#aeb6c3; --text:#f3f5fa;
-    --accent:#ff9d66; --accent-2:#ffd166;
-    --ring:#6b7280;
-    --chip-bg:#1b2230; --chip-active:#ffb86b;
-    --badge-bg:#ffe8c9; --badge-text:#3b1f06; /* high-contrast number badge */
-    --table-row:#0f1420; --table-row-alt:#0d111a;
-    --border:rgba(255,255,255,.08);
-  }
-  * { box-sizing:border-box; }
-  html,body { height:100%; }
-  body {
-    margin:0; background:linear-gradient(180deg,var(--bg-top),var(--bg-btm));
-    color:var(--text); font: 14px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Noto Sans, "PingFang TC", "Microsoft JhengHei", sans-serif;
-    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-  }
-  .layout { display:grid; grid-template-columns: 320px 1fr; gap:16px; padding:22px; max-width:1400px; margin:0 auto; }
-  .side, .main { background:var(--panel); border:1px solid var(--border); border-radius:18px; }
-  .side { padding:16px; position:sticky; top:16px; height:calc(100vh - 32px); overflow:auto; }
-  .main { padding:16px; position:relative; }
-  .title { font-weight:800; font-size:20px; margin-bottom:12px; letter-spacing:.3px; }
-  .muted { color:var(--muted); font-size:12px; }
-  .field { margin-bottom:12px; }
-  .field label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; }
-  input[type="text"], select {
-    width:100%; padding:12px 12px; border:1px solid #23252c; background:#0f1117; color:var(--text); border-radius:12px; outline:none;
-  }
-  input[type="text"]:focus, select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,157,102,.25); }
-  .chips { display:flex; flex-wrap:wrap; gap:8px; }
-  .chip { background:var(--chip-bg); border:1px solid var(--border); padding:7px 12px; border-radius:999px; font-size:12px; cursor:pointer; user-select:none; -webkit-user-select:none; transition:transform .06s ease, box-shadow .2s ease, border-color .2s ease; }
-  .chip:hover { border-color:var(--chip-active); transform: translateY(-1px); }
-  .chip.active { border-color:var(--chip-active); box-shadow:0 0 0 3px rgba(255,184,107,.2); }
-  .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:12px 0; position:relative; z-index:5; }
-  .pill { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:#0f1117; padding:6px 10px; border-radius:999px; font-size:12px; color:#e8edf9; }
-  .btn { appearance:none; border:none; background:linear-gradient(135deg,var(--accent),#ff7e5f); color:#111; font-weight:800; padding:10px 14px; border-radius:12px; cursor:pointer; }
-  .btn.sec { background:#22262f; color:#cfd6e6; }
-  table { width:100%; border-collapse:separate; border-spacing:0; font-size:14px; overflow:hidden; border-radius:12px; }
-  thead th { position:sticky; top:0; background:linear-gradient(180deg,#151b27,#121722); z-index:1; color:#cfe2ff; text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); }
-  tbody td { padding:10px 12px; border-bottom:1px dashed var(--border); }
-  tbody tr:nth-child(odd){ background:var(--table-row-alt); }
-  tbody tr:nth-child(even){ background:var(--table-row); }
-  tbody tr:hover { background:#1a2130; }
-  .ability { font-size:12px; padding:3px 9px; border-radius:999px; background:var(--badge-bg); color:var(--badge-text); border:1px solid rgba(0,0,0,.05); cursor:pointer; font-weight:800; box-shadow:0 1px 0 rgba(0,0,0,.25), 0 0 0 3px rgba(255,209,102,.18); }
-  .ability:hover { box-shadow:0 1px 0 rgba(0,0,0,.25), 0 0 0 3px rgba(255,209,102,.34); }
-  .righthead { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; position:relative; z-index:5; }
-  .pagination { display:flex; gap:8px; align-items:center; position:relative; z-index:5; }
-  .pgbtn { padding:8px 12px; border-radius:10px; background:#20242c; color:#f2f6ff; border:1px solid var(--border); cursor:pointer; pointer-events:auto; font-weight:700; }
-  .pgbtn[disabled] { opacity:.45; cursor:not-allowed; }
-  #pagejump { width:70px; }
-  #tablewrap { position:relative; z-index:1; margin-bottom: 16px; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>瑪奇農場娃娃能力值查詢</title>
+  <style>
+    :root {
+      --bg: #09111f;
+      --bg-accent: #10213f;
+      --panel: rgba(9, 17, 31, 0.82);
+      --panel-strong: rgba(11, 21, 38, 0.94);
+      --line: rgba(186, 212, 255, 0.15);
+      --text: #eef5ff;
+      --muted: #9eb4d6;
+      --soft: #d9e7ff;
+      --gold: #f2c46f;
+      --gold-strong: #ffdd9e;
+      --cyan: #7ad8ff;
+      --cyan-strong: #b9efff;
+      --rose: #ffc8d6;
+      --shadow: 0 14px 32px rgba(0, 0, 0, 0.26);
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(88, 163, 255, 0.18), transparent 32%),
+        radial-gradient(circle at 85% 8%, rgba(242, 196, 111, 0.14), transparent 22%),
+        linear-gradient(180deg, #0a152a 0%, #08101d 52%, #050a14 100%);
+      font: 15px/1.65 "Segoe UI", "Microsoft JhengHei UI", "PingFang TC", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(130deg, rgba(255, 255, 255, 0.03) 25%, transparent 25%) 0 0 / 28px 28px,
+        linear-gradient(310deg, rgba(255, 255, 255, 0.02) 25%, transparent 25%) 0 0 / 28px 28px;
+      opacity: 0.25;
+    }
+
+    .shell {
+      width: min(1540px, calc(100% - 20px));
+      margin: 10px auto 22px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background:
+        linear-gradient(140deg, rgba(17, 37, 66, 0.92), rgba(8, 18, 33, 0.96)),
+        rgba(9, 17, 31, 0.9);
+      box-shadow: var(--shadow);
+      isolation: isolate;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      right: -60px;
+      top: -80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(122, 216, 255, 0.22), transparent 65%);
+      z-index: -1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(242, 196, 111, 0.25);
+      color: var(--gold-strong);
+      background: rgba(242, 196, 111, 0.08);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-family: "Georgia", "Times New Roman", "Noto Serif TC", serif;
+      letter-spacing: 0.02em;
+    }
+
+    .hero h1 {
+      margin-top: 6px;
+      font-size: 26px;
+      line-height: 1.12;
+    }
+
+    .hero p {
+      display: none;
+    }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .hero-stat,
+    .panel,
+    .result-card,
+    .table-card,
+    .empty-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-stat {
+      min-width: 132px;
+      padding: 7px 10px;
+      border-radius: var(--radius-md);
+    }
+
+    .hero-stat strong {
+      display: inline;
+      margin-right: 6px;
+      font-size: 18px;
+      color: var(--cyan-strong);
+    }
+
+    .hero-stat span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .hero-side {
+      display: none;
+    }
+
+    .hero-note {
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(7, 16, 31, 0.88), rgba(11, 24, 43, 0.9));
+      border: 1px solid var(--line);
+    }
+
+    .hero-note strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--soft);
+    }
+
+    .hero-note p,
+    .hero-note li {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .hero-note ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: 282px minmax(0, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+      align-items: start;
+    }
+
+    .panel {
+      border-radius: var(--radius-lg);
+      padding: 14px;
+    }
+
+    .panel h2 {
+      font-size: 18px;
+    }
+
+    .panel-subtitle {
+      display: none;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .panel.sticky {
+      position: sticky;
+      top: 10px;
+    }
+
+    .field {
+      margin-bottom: 10px;
+    }
+
+    .field label,
+    .inline-label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--soft);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .control,
+    select,
+    input[type="search"],
+    input[type="number"] {
+      width: 100%;
+      min-height: 36px;
+      padding: 7px 10px;
+      color: var(--text);
+      background: rgba(4, 11, 21, 0.92);
+      border: 1px solid rgba(186, 212, 255, 0.16);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .control:focus,
+    select:focus,
+    input[type="search"]:focus,
+    input[type="number"]:focus {
+      border-color: rgba(122, 216, 255, 0.64);
+      box-shadow: 0 0 0 4px rgba(122, 216, 255, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .toggle-row,
+    .toolbar,
+    .split,
+    .summary-strip,
+    .sheet-pills,
+    .chip-row,
+    .card-stats,
+    .pagination {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .toggle-row {
+      margin-bottom: 10px;
+    }
+
+    .mode-btn,
+    .sheet-pill,
+    .ability-chip,
+    .ghost-btn,
+    .primary-btn,
+    .page-btn,
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(186, 212, 255, 0.16);
+      color: var(--text);
+      background: rgba(6, 15, 28, 0.84);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease;
+    }
+
+    .mode-btn:hover,
+    .sheet-pill:hover,
+    .ability-chip:hover,
+    .ghost-btn:hover,
+    .primary-btn:hover,
+    .page-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(242, 196, 111, 0.5);
+    }
+
+    .mode-btn.active,
+    .sheet-pill.active,
+    .ability-chip.active {
+      color: #07121f;
+      border-color: rgba(255, 221, 158, 0.7);
+      background: linear-gradient(135deg, var(--gold), var(--gold-strong));
+      font-weight: 700;
+    }
+
+    .primary-btn {
+      color: #08111f;
+      background: linear-gradient(135deg, var(--gold), var(--gold-strong));
+      border-color: rgba(255, 221, 158, 0.78);
+      font-weight: 800;
+    }
+
+    .ghost-btn {
+      background: rgba(9, 18, 34, 0.88);
+    }
+
+    .sheet-pills {
+      margin-top: 8px;
+    }
+
+    .chip-row {
+      max-height: 170px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .chip-row::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .chip-row::-webkit-scrollbar-thumb {
+      background: rgba(186, 212, 255, 0.16);
+      border-radius: 999px;
+    }
+
+    .summary-strip {
+      margin-top: 10px;
+    }
+
+    .tag {
+      cursor: default;
+      min-height: 30px;
+      font-size: 12px;
+      color: var(--soft);
+      background: rgba(9, 21, 38, 0.82);
+    }
+
+    .main-column {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .toolbar {
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .toolbar h2 {
+      font-size: 21px;
+    }
+
+    .toolbar p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .split {
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .result-card {
+      position: relative;
+      overflow: hidden;
+      padding: 12px;
+      border-radius: 10px;
+      background:
+        linear-gradient(180deg, rgba(16, 29, 51, 0.9), rgba(8, 17, 31, 0.94)),
+        var(--panel);
+    }
+
+    .result-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -30px -70px auto;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(122, 216, 255, 0.18), transparent 65%);
+      pointer-events: none;
+    }
+
+    .result-card header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .result-card h3 {
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .sheet-badge {
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(242, 196, 111, 0.12);
+      color: var(--gold-strong);
+      font-size: 11px;
+      white-space: nowrap;
+      border: 1px solid rgba(242, 196, 111, 0.24);
+    }
+
+    .card-meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .card-stats {
+      margin-top: 8px;
+    }
+
+    .stat-chip {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(122, 216, 255, 0.18);
+      background: rgba(8, 19, 35, 0.8);
+      color: var(--cyan-strong);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .stat-chip strong {
+      color: var(--gold-strong);
+      font-size: 13px;
+    }
+
+    .card-note {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(186, 212, 255, 0.14);
+      color: var(--soft);
+      font-size: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .table-card,
+    .empty-card {
+      padding: 14px;
+      border-radius: var(--radius-lg);
+    }
+
+    table {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: auto;
+      font-size: 13px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      text-align: left;
+      min-width: 70px;
+      padding: 8px 10px;
+      color: var(--gold-strong);
+      background: rgba(6, 14, 26, 0.98);
+      border-bottom: 1px solid rgba(186, 212, 255, 0.14);
+      line-height: 1.35;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      min-width: 70px;
+      padding: 7px 10px;
+      border-bottom: 1px dashed rgba(186, 212, 255, 0.12);
+      vertical-align: top;
+      color: var(--soft);
+      line-height: 1.45;
+      white-space: nowrap;
+    }
+
+    thead th.name-cell,
+    tbody td.name-cell {
+      position: sticky;
+      left: 0;
+      min-width: 190px;
+      max-width: 240px;
+      z-index: 2;
+      background: rgba(6, 14, 26, 0.98);
+      white-space: normal;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+      box-shadow: 1px 0 0 rgba(186, 212, 255, 0.12);
+    }
+
+    tbody td.name-cell {
+      z-index: 1;
+      color: var(--text);
+      font-weight: 650;
+      background: rgba(8, 17, 31, 0.98);
+    }
+
+    td.meta-cell {
+      min-width: 170px;
+      max-width: 260px;
+      white-space: normal;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+      color: var(--muted);
+    }
+
+    .empty-value {
+      color: rgba(158, 180, 214, 0.34);
+    }
+
+    tbody tr:hover {
+      background: rgba(122, 216, 255, 0.05);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      max-height: 560px;
+      border-radius: 10px;
+      border: 1px solid rgba(186, 212, 255, 0.1);
+      background: rgba(4, 11, 21, 0.58);
+      scrollbar-color: rgba(122, 216, 255, 0.36) rgba(8, 17, 31, 0.92);
+      scrollbar-width: thin;
+    }
+
+    .table-wrap::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+
+    .table-wrap::-webkit-scrollbar-track {
+      background: rgba(8, 17, 31, 0.92);
+    }
+
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(122, 216, 255, 0.45), rgba(242, 196, 111, 0.38));
+      border: 3px solid rgba(8, 17, 31, 0.92);
+      border-radius: 999px;
+    }
+
+    .mini-note {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .empty-card {
+      text-align: center;
+      color: var(--muted);
+      min-height: 160px;
+      display: grid;
+      place-items: center;
+    }
+
+    .empty-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 18px;
+      color: var(--soft);
+    }
+
+    .pagination {
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .page-btn[disabled] {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .footer-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1100px) {
+      .hero,
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel.sticky {
+        position: static;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        width: min(100% - 12px, 1480px);
+        margin-top: 6px;
+      }
+
+      .hero,
+      .panel,
+      .table-card,
+      .empty-card {
+        padding: 12px;
+        border-radius: 12px;
+      }
+
+      .hero-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar,
+      .split {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .pagination {
+        justify-content: stretch;
+      }
+
+      .page-btn,
+      .mode-btn,
+      .sheet-pill,
+      .ability-chip,
+      .ghost-btn,
+      .primary-btn {
+        flex: 1 1 auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="layout">
-  <aside class="side">
-    <div class="title">篩選</div>
-    <div class="field">
-      <label for="mode">模式</label>
-      <select id="mode" title="選擇查詢模式" aria-label="選擇查詢模式">
-        <option value="name">搜尋名稱</option>
-        <option value="ability">點選能力→找出有哪些道具</option>
-      </select>
-    </div>
-    <div class="field" id="nameBox">
-      <label for="q">名稱關鍵字（支援多關鍵字空白分隔）</label>
-      <input id="q" type="text" placeholder="例：妖精 速度" aria-label="名稱關鍵字">
-    </div>
-    <div class="field">
-      <label for="sheet">資料表（工作表）</label>
-      <select id="sheet" title="選擇工作表" aria-label="選擇工作表"></select>
-    </div>
-    <div class="field" id="abilityBox" style="display:none;">
-      <label>點選能力（可多選）</label>
-      <div class="chips" id="abilityChips" aria-label="能力選擇區"></div>
-      <div class="field" style="margin-top:10px;">
-        <label for="logic">多選邏輯</label>
-        <select id="logic" title="多選邏輯" aria-label="多選邏輯">
-          <option value="AND">同時具備（AND）</option>
-          <option value="OR">任一具備（OR）</option>
-        </select>
+  <div class="shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Farm Beauty Codex</div>
+        <h1>瑪奇農場娃娃能力值查詢</h1>
+        <p>
+          把娃娃、額外模型、小屋與女神像能力集中成一個可快速篩選的圖鑑。你可以用名稱搜尋，也可以直接點能力值，快速找出可疊的組合。
+        </p>
+        <div class="hero-stats" id="heroStats"></div>
       </div>
-    </div>
-  </aside>
-  <main class="main">
-    <div class="righthead">
-      <div class="title">結果</div>
-      <div class="pill" id="stats" aria-live="polite">0 筆</div>
-    </div>
-    <div class="toolbar">
-      <div class="pill">提示：點表格中的能力標籤可直接加入篩選</div>
-      <button id="clear" class="btn sec" aria-label="清空篩選">清空篩選</button>
-    </div>
-    <div id="tablewrap"></div>
-    <div class="toolbar" style="justify-content:flex-end;">
-      <div class="pagination">
-        <button id="prev" class="pgbtn" disabled aria-label="上一頁">← 上一頁</button>
-        <span id="pageinfo" aria-live="polite"></span>
-        <button id="next" class="pgbtn" disabled aria-label="下一頁">下一頁 →</button>
-        <span class="muted">跳至</span>
-        <input id="pagejump" type="number" min="1" value="1" aria-label="跳至頁碼">
-        <button id="go" class="pgbtn" aria-label="前往頁碼">GO</button>
+      <div class="hero-side">
+        <div class="hero-note">
+          <strong>這次重做的方向</strong>
+          <ul>
+            <li>把 Excel 資料拆成獨立 JS 資料庫，不再把整包 JSON 硬塞在 HTML 裡。</li>
+            <li>查詢區改成圖鑑式介面，先看結果卡片，再需要時往下看完整表格。</li>
+            <li>保留全工作表資料，但預設聚焦在娃娃能力相關頁籤。</li>
+          </ul>
+        </div>
+        <div class="hero-note">
+          <strong>使用方式</strong>
+          <p>名稱模式支援多關鍵字搜尋；能力模式可多選條件，並切換 AND / OR 邏輯。</p>
+        </div>
       </div>
+    </section>
+
+    <div class="app-grid">
+      <aside class="panel sticky" aria-label="查詢設定">
+        <h2>篩選控制台</h2>
+        <p class="panel-subtitle">用工作表、名稱、能力條件和排序方式快速縮小結果。</p>
+
+        <div class="toggle-row" id="modeToggle" aria-label="查詢模式"></div>
+
+        <div class="field">
+          <label class="inline-label" for="sheetSelect">資料工作表</label>
+          <select id="sheetSelect"></select>
+          <div class="sheet-pills" id="sheetPills"></div>
+        </div>
+
+        <div class="field" id="searchField">
+          <label class="inline-label" for="searchInput">名稱或來源關鍵字</label>
+          <input id="searchInput" type="search" placeholder="例如：妖精、速度、嘉年華" />
+        </div>
+
+        <div class="field">
+          <label class="inline-label" for="sortSelect">排序方式</label>
+          <select id="sortSelect"></select>
+        </div>
+
+        <div class="field" id="logicField">
+          <label class="inline-label" for="logicSelect">能力條件邏輯</label>
+          <select id="logicSelect">
+            <option value="AND">全部都要</option>
+            <option value="OR">符合其中之一</option>
+          </select>
+        </div>
+
+        <div class="field" id="abilityField">
+          <div class="split">
+            <label class="inline-label">能力值條件</label>
+            <button class="ghost-btn" id="clearAbilityBtn" type="button">清空能力</button>
+          </div>
+          <div class="chip-row" id="abilityChips"></div>
+        </div>
+
+        <div class="summary-strip" id="activeFilters"></div>
+
+        <div class="toolbar" style="margin-top: 18px;">
+          <button class="primary-btn" id="resetBtn" type="button">重設全部篩選</button>
+        </div>
+      </aside>
+
+      <main class="main-column">
+        <section class="panel">
+          <div class="toolbar">
+            <div>
+              <h2 id="resultHeading">結果總覽</h2>
+              <p id="resultSubheading">讀取資料中…</p>
+            </div>
+            <div class="summary-strip" id="summaryStrip"></div>
+          </div>
+          <div class="result-grid" id="resultGrid"></div>
+          <div class="pagination" id="paginationBar"></div>
+        </section>
+
+        <section class="table-card">
+          <div class="toolbar">
+            <div>
+              <h2>完整資料表</h2>
+              <p>下方保留欄位原貌，方便直接對照來源與備註。</p>
+            </div>
+            <div class="mini-note" id="tableMeta"></div>
+          </div>
+          <div class="table-wrap" id="tableWrap"></div>
+          <div class="footer-note" id="footerNote"></div>
+        </section>
+      </main>
     </div>
-  </main>
-</div>
+  </div>
 
-<script>
-const PAGE_SIZE = 50;
-const DATA = JSON.parse("{\"sheets\": {\"\u7d20\u8cea\": [{\"\u540d\u7a31\": \"\ub0ad\ub9cc \ub18d\uc7a5 \uae38\ub4e4\uc5ec\uc9c4 \uc0c8\ub07c \ub4dc\ub798\uace4\", \"\u8840\": \"\", \"\u9b54\": 25.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 5.0, \"\u654f\": 4.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u746a\u5947x\u99b4\u9f8d\u9ad8\u624b2\", \"\u53f0\u670d\": \"x\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u746a\u9e97\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 5.0, \"\u610f\": \"\", \"\u5e78\": 3.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"M\u786c\u5e63\u7bb1\u5b50\\nM\u786c\u5e6320\u679a\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\u8a2d\u7f6e\u6578\u91cf\u7121\u9650\u5236\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u9b6f\u827e\u5229\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 2.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 6.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"M\u786c\u5e63\u7bb1\u5b50\\nM\u786c\u5e6320\u679a\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\u4f46\u540c\u7a2e\u7d20\u8cea\u53d6\u6700\u5927\u503c, \u53ef\u8207\u984d\u5916(extra)\u6a21\u578b, \u5c0f\u5c4b\u758a\u52a0\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7279\u62c9\u514b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 6.0, \"\u654f\": \"\", \"\u610f\": 2.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"M\u786c\u5e63\u7bb1\u5b50\\nM\u786c\u5e6320\u679a\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u514b\u8389\u7d72\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 4.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 4.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u7b2c3-8\u968e\u6bb5\\n\u8b49\u660e\u7684\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\u8a2d\u7f6e\", \"Unnamed: 23\": \"\u5973\u795e\u796d\u58c7*2(\u751f\u547d+20), \u5730\u4e0b\u57ce\u67f1\u5b50*1(\u751f\u547d+10, \u9b54\u529b+10)\"}, {\"\u540d\u7a31\": \"\u8cbf\u6613\u6240\u98df\u4eba\u9b54\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 4.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 4.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u8d08\u54c1\u8f2a\u76e4\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"+\", \"Unnamed: 23\": \"\u7279\u4f9d\u5948\u4eba\u5f62\u6a21\u5076*2 (\u529b\u91cf +6), \u82b1\u6f3e\u958b\u5fc3\u679c\u5996\u7cbe*1 (\u529b\u91cf +3, \u5e78\u904b +3)\"}, {\"\u540d\u7a31\": \"\u5973\u795e\u7684\u796d\u58c7\", \"\u8840\": 20.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"10.11\u9031\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"+\", \"Unnamed: 23\": \"\u96f2\u6735\u5750\u588a(2\u968e\u6bb5)(\u751f\u547d+10, \u529b\u91cf+2) , \u548c\u99ac\u5ec4(2\u968e\u6bb5)(\u751f\u547d+15, \u610f\u5fd7+2)\"}, {\"\u540d\u7a31\": \"\u5de8\u77f3\u9663\", \"\u8840\": \"\", \"\u9b54\": 20.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"10.11\u9031\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"->\", \"Unnamed: 23\": \"\u4eba\u7269\u7d20\u8cea(\u751f\u547d+35, \u9b54\u529b+10, \u529b\u91cf+8, \u610f\u5fd7+2, \u5e78\u904b +3)\"}, {\"\u540d\u7a31\": \"\u91cc\u4e9e\u5e15\u52d2\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 20.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"10.11\u9031\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5730\u4e0b\u57ce\u67f1\u5b50\", \"\u8840\": 10.0, \"\u9b54\": 10.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"10.11\u9031\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"*\u7070\u5e95\u53f0\u670d\u672a\u5be6\u88dd\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8cbf\u6613\u6240\", \"\u8840\": 10.0, \"\u9b54\": \"\", \"\u8010\": 10.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"10.11\u9031\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5a1c\u6b50\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 2.0, \"\u610f\": \"\", \"\u5e78\": 6.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"10\u5468\u5e74\u5609\u5e74\u83ef\u7bb1\u5b50(\u8f49\u86cb)\", \"\u53f0\u670d\": \"\u652f\u63f4\u5a03\u5a03\u7d44\u5408\u5305\\n\u8f49\u86cb\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5c0f\u7279\u62c9\u514b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 3.0, \"\u610f\": \"\", \"\u5e78\": 5.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"10\u5468\u5e74\u5609\u5e74\u83ef\u7bb1\u5b50(\u8f49\u86cb)\", \"\u53f0\u670d\": \"x\", \"Unnamed: 22\": \"\u984d\u5916\u50b7\u5bb31%\u589e\u52a0, \u53ef\u8207\u5176\u4ed6\u589e\u50b7\u6548\u679c\u758a\u52a0\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u62ff\u8457\u9435\u939a\u7684\u4f5b\u683c\u65af\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 3.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 5.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"10\u5468\u5e74\u5609\u5e74\u83ef\u7bb1\u5b50(\u8f49\u86cb)\", \"\u53f0\u670d\": \"x\", \"Unnamed: 22\": \"\u984d\u5916\u50b7\u5bb31%\u589e\u52a0\u548c\u984d\u5916\u50b7\u5bb310%\u589e\u52a0 -> \u6700\u7d42\u50b7\u5bb3\u76841.11\u500d(\u6700\u5f8c\u50b7\u5bb3*(1+0.01+0.1))\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8a13\u7df4\u6240\u67f1\u5b50\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 4.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 2.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u8a13\u7df4\u6240\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u842c\u4e8b\u901a\u5996\u7cbe\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 5.0, \"\u5e78\": 3.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u9935\u5f69\u8679\u7cd650\u6b21(\u780d\u67f4)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u958b\u5fc3\u679c\u5996\u7cbe\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 5.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 3.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u9935\u5f69\u8679\u7cd650\u6b21(\u6dd8\u91d1.\u63a1\u7926)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8caa\u5403\u9b3c\u5996\u7cbe\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 3.0, \"\u667a\": \"\", \"\u654f\": 5.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u9935\u5f69\u8679\u7cd650\u6b21\\n(\u8490\u96c6\u96de\u86cb.\u63a1\u96c6\u9999\u83c7.\u64e0\u725b\u5976.\u92e4\u7530.\u79cb\u6536)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u842c\u4eba\u8ff7\u5996\u7cbe\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 3.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 5.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u9935\u5f69\u8679\u7cd650\u6b21(\u526a\u7f8a\u6bdb)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5927\u5584\u4eba\u5996\u7cbe\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 5.0, \"\u654f\": 3.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u9935\u5f69\u8679\u7cd650\u6b21(\u63a1\u96c6\u85e5\u8349)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u96f7\u8afe\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 6.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 2.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"M\u786c\u5e63\u7bb1\u5b50\\nM\u786c\u5e6320\u679a\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8c9d\u4f0a\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 5.0, \"\u654f\": \"\", \"\u610f\": 3.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"M\u786c\u5e63\u7bb1\u5b50\\nM\u786c\u5e6320\u679a\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u4fe1\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 6.0, \"\u610f\": \"\", \"\u5e78\": 2.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"M\u786c\u5e63\u7bb1\u5b50\\nM\u786c\u5e6320\u679a\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u54c0\u50b7\u4e4b\u7891\", \"\u8840\": 25.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 5.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 2.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5730\u4e0b\u57ce\u8abf\u67e5\u5831\u544a\u66f870\u679a\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u73ee\u897f\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 25.0, \"\u529b\": 6.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5609\u5e74\u83ef\u6703\u5c0b\u5bf6\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u63d0\u4e9e\", \"\u8840\": \"\", \"\u9b54\": 25.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 6.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5609\u5e74\u83ef\u6703\u5c0b\u5bf6\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7f85\u840a\u56e0\u7684\u60e1\u5922\u7cbe\u5f69\u6d3b\u52d5\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 5.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 3.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"12\u5468\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"12\u5468\u5e74\u767b\u5165\u9001\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6b7b\u4ea1\u8a66\u7149\u7cbe\u5f69\u6d3b\u52d5\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 5.0, \"\u610f\": \"\", \"\u5e78\": 3.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"12\u5468\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"12\u5468\u5e74\u767b\u5165\u9001\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7121\u9650\u5730\u4e0b\u57ce\u6293\u5c3e\u5df4\u7cbe\u5f69\u6d3b\u52d5\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 5.0, \"\u5e78\": 3.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"12\u5468\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"12\u5468\u5e74\u767b\u5165\u9001\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5609\u5e74\u83ef\u5730\u6a19(\u5c0f)\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 5.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 3.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"12\u5468\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"12\u5468\u5e74\u767b\u5165\u9001\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8c4e\u7434\u77f3\u50cf\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 3.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u88fd\u4f5c\u9b54\u6cd5\u97f3\u6a02\u76d2\u734e\u52f5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u827e\u8587\u7433\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 3.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\\n2017\u5357\u74dc\u7bb1\u5b50\\n2018\u6e21\u5047\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u4e9e\u7279\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 3.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 4.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\\n2017\u5357\u74dc\u7bb1\u5b50\\n2018\u6e21\u5047\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5361\u8332\u9060\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 1.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\\n2017\u5357\u74dc\u7bb1\u5b50\\n2018\u6e21\u5047\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7562\u5948\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 3.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\\n2017\u5357\u74dc\u7bb1\u5b50\\n2018\u6e21\u5047\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6258\u723e\u7dad\u65af\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 3.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 5.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\\n2017\u5357\u74dc\u7bb1\u5b50\\n2018\u6e21\u5047\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u591c\", \"\u8840\": 20.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 5.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u590f\", \"\u8840\": \"\", \"\u9b54\": 20.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 5.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u827e\u9813\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 15.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 3.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u963f\u65af\u514b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 15.0, \"\u529b\": 3.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5eab\u8cfd\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 15.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 3.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6f58\u8cc8\u65af\u7279\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 15.0, \"\u529b\": \"\", \"\u667a\": 3.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7c73\u6069\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 15.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 3.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"13\u5468\u5e74\u8f49\u86cb\", \"\u53f0\u670d\": \"\u6d6a\u6f2b\u73ab\u7470\u5bf6\u7bb1\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5c11\u5973\u7684\u756b\u67b6\", \"\u8840\": 3.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 3.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 1.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u9577\u817f\u7c73\u5217\u897f\u5b89\", \"\u53f0\u670d\": \"\u9577\u817f\u7c73\u5217\u897f\u5b89\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6625\u5929\u82b1\u5712\u6c34\u4e95\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.05, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6625\u5929\u82b1\u5712\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6625\u5929\u82b1\u5712\u5674\u6cc9\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 3.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6625\u5929\u82b1\u5712\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6625\u5929\u82b1\u5712\u85e4\u6a39\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 7.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6625\u5929\u82b1\u5712\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6625\u5929\u82b1\u5712\u6afb\u82b1\u9577\u6905\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 7.0, \"\u654f\": \"\", \"\u610f\": 5.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6625\u5929\u82b1\u5712\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d1b\u7dad\u6797\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 10.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 4.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u661f\u661f\u788e\u72473rd\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6771\u6d0b\u6c60\u5858\", \"\u8840\": 10.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 7.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6771\u65b9\u98a8\u8f49\u86cb\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6771\u6d0b\u6dbc\u4ead\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 7.0, \"\u610f\": \"\", \"\u5e78\": 3.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 4.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6771\u65b9\u98a8\u8f49\u86cb\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6771\u6d0b\u5c0f\u578b\u62f1\u9580\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 3.0, \"\u5e78\": 7.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6771\u65b9\u98a8\u8f49\u86cb\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6771\u6d0b\u5927\u578b\u62f1\u9580\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 3.0, \"\u5e78\": 7.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6771\u65b9\u98a8\u8f49\u86cb\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6771\u6d0b\u9577\u6905\", \"\u8840\": \"\", \"\u9b54\": 10.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 6.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 1.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6771\u65b9\u98a8\u8f49\u86cb\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6cf0\u8d6b\u5716\u6bb7\u4e4b\u9580\u6a21\u578b\", \"\u8840\": 28.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 2.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"G22 \u660e\u65e5\u79ae\u7269\u7bb1(\u7b2c3\u5929)\", \"\u53f0\u670d\": \"\u5171\u5275\u7d2f\u7a4d\u5dd4\u5cf0\u6311\u6230\u8cfd\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7279\u6b8a\u51ac\u5b63\u6eab\u6cc9\", \"\u8840\": 20.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 3.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.05, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6eab\u6696\u6eab\u6cc9\u7c43\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7279\u6b8a\u6eab\u6696\u5347\u9a30\u4e4b\u4ead\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 10.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 5.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6eab\u6696\u6eab\u6cc9\u7c43\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7279\u6b8a\u6cc9\u6c34\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 9.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 7.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6eab\u6696\u6eab\u6cc9\u7c43\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u51ac\u5b63\u7687\u5bb6\u82b1\u5712\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 5.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 2.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6eab\u6696\u6eab\u6cc9\u7c43\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6469\u52d2\u611b\u5fb7\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 3.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 4.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6eab\u6696\u6eab\u6cc9\u7c43\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8c9d\u4ec1\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 3.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 5.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6eab\u6696\u6eab\u6cc9\u7c43\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u76ae\u9b6f\u5b89\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 3.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6eab\u6696\u6eab\u6cc9\u7c43\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u514b\u8d6b\u84ee\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 3.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 4.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6eab\u6696\u6eab\u6cc9\u7c43\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5df4\u5716\u9b6f\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 5.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5e15\u8fea\u4e9e\u9732\u9732\u7684\u611f\u8b1d\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7c73\u7f85\u821e\u5152\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 5.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5e15\u8fea\u4e9e\u9732\u9732\u7684\u611f\u8b1d\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5854\u59ae\u8389\u59c6\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 6.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 3.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5e15\u8fea\u4e9e\u9732\u9732\u7684\u611f\u8b1d\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u9003\u812b\u5e15\u8fea\u4e9e\u9732\u9732\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 2.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 8.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5e15\u8fea\u4e9e\u9732\u9732\u7684\u611f\u8b1d\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u85cd\u8272\u5e15\u8fea\u4e9e\u9732\u9732\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 2.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 8.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5e15\u8fea\u4e9e\u9732\u9732\u7684\u611f\u8b1d\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7da0\u8272\u5e15\u8fea\u4e9e\u9732\u9732\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 2.0, \"\u610f\": \"\", \"\u5e78\": 8.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5e15\u8fea\u4e9e\u9732\u9732\u7684\u611f\u8b1d\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7c89\u8272\u5e15\u8fea\u4e9e\u9732\u9732\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 2.0, \"\u5e78\": 8.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5e15\u8fea\u4e9e\u9732\u9732\u7684\u611f\u8b1d\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7279\u5225\u6708\u4e4b\u5996\u7cbe\u6c60\u5858\", \"\u8840\": \"\", \"\u9b54\": 10.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 8.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6708\u4e4b\u5996\u7cbe\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7279\u5225\u6708\u4e4b\u5996\u7cbe\u97a6\u97c6\", \"\u8840\": 10.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 8.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 7.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6708\u4e4b\u5996\u7cbe\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5973\u795e\u964d\u81e8\u7684\u795e\u8056\u7684\u8056\u6c34\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 8.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u795e\u8056\u5149\u4e4b\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u9752\u74f7\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 5.0, \"\u9b54\u653b\": 5.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.02, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u9676\u85dd\u5bb6\u7684\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8b80\u66f8\u7684\u5a1c\u6b50\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": 0.01, \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"2019 \u5feb\u554f\u5feb\u7b54\u6d3b\u52d5\", \"\u53f0\u670d\": \"(17\u5468\u5e74)\u5373\u5e2d\u62bd\u734e\u79ae\u7269\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8dd1\u8dd1\u5361\u4e01\u8eca\u774f\u5bf6\u6a21\u578b(\u7d05\u8272)\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 5.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.03, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u8dd1\u8dd1\u5361\u4e01\u8eca\u5c55\u793a\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8dd1\u8dd1\u5361\u4e01\u8eca\u774f\u5bf6\u6a21\u578b(\u85cd\u8272)\", \"\u8840\": \"\", \"\u9b54\": 8.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 8.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 5.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u8dd1\u8dd1\u5361\u4e01\u8eca\u5c55\u793a\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8dd1\u8dd1\u5361\u4e01\u8eca\u774f\u5bf6\u6a21\u578b(\u9ec3\u8272)\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 5.0, \"\u610f\": \"\", \"\u5e78\": 7.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 1.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u8dd1\u8dd1\u5361\u4e01\u8eca\u5c55\u793a\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6469\u683c\u6885\u723e\u4e4b\u9580\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 5.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\ud3ab\ud48d\ub2f9\ub2f9 \uc120\ubb3c \uc0c1\uc790\", \"\u53f0\u670d\": \"\u5bf5\u7269\u8a13\u7df4\u6311\u6230\u6d3b\u52d5\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6469\u683c\u6885\u723e\u4e4b\u9580(\u56db\u5b63\u4e4b\u68ee)\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 5.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5967\u5e0c\u5fb7\u7684\u7279\u5225\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6469\u683c\u6885\u723e\u4e4b\u9580(\u8e8d\u52d5\u7684\u5927\u5730)\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 5.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5967\u5e0c\u5fb7\u7684\u7279\u5225\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5927\u6afb\u82b1\u6a39\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 3.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 5.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 1.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u540c\u53f3\", \"\u53f0\u670d\": \"\u54c8\u8499\u6afb\u82b1\u6a39\u6d3b\u52d5\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"PPP \u5718\u9ad4\u7b49\u8eab\u53f0\", \"\u8840\": 50.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 3.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.03, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u52d5\u7269\u670b\u53cb\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7279\u5225\u7955\u5bc6\u82b1\u5712\u62f1\u9580\", \"\u8840\": 10.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 8.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 7.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"x\", \"\u53f0\u670d\": \"\u7955\u5bc6\u82b1\u5712\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7279\u5225\u7955\u5bc6\u82b1\u5712\u96b1\u5bc6\u7684\u5674\u6c34\u6c60\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 3.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"x\", \"\u53f0\u670d\": \"\u7955\u5bc6\u82b1\u5712\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u83ef\u9e97\u7684\u6c99\u57ce\u5821\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 5.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 10.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 5.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6c34\u624b\u7c43\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u82ac\u5947\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 5.0, \"\u984d\u5916\u50b7\u5bb3\": 0.01, \"\u66b4\u64ca\u50b7\u5bb3\": 0.03, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u540c\u53f3\", \"\u53f0\u670d\": \"\u5bf5\u7269\u8a13\u7df4\u6311\u6230\u6d3b\u52d5\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5973\u795e\u65bd\u5c55\u7684\u6df1\u6df5\u6c23\u606f\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.06, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u540c\u53f3\", \"\u53f0\u670d\": \"\u6697\u9ed1\u4e3b\u6559\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u57c3\u5766\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 11.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 6.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u751c\u871c\u5b78\u9662\u7bb1\u5b50\", \"\u53f0\u670d\": \"2020 \u8d85\u7d1a\u8cd3\u679c\u6d3b\u52d5\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6069\u96c5\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": 0.01, \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u751c\u871c\u5b78\u9662\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u7e61\u7403\u82b1\u85cd\u8272\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5e03\u863f\u59ae\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 4.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 7.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u751c\u871c\u5b78\u9662\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u7e61\u7403\u82b1\u85cd\u8272\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u73c0\u62c9\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 6.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 6.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u751c\u871c\u5b78\u9662\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u7e61\u7403\u82b1\u85cd\u8272\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u9edb\u4f0a\u723e\u5e03\u62c9\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 5.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 2.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u751c\u871c\u5b78\u9662\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u7e61\u7403\u82b1\u85cd\u8272\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u82ac\u5947\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 10.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.04, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u751c\u871c\u5b78\u9662\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u7e61\u7403\u82b1\u85cd\u8272\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7687\u5bb6\u5929\u6587\u5b78\u6703\u5e33\u7bf7\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 7.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 5.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": 0.01, \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6211\u7684\u5922\u60f3\u662f\u5929\u6587\u5b78\u5bb6\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u5fa9\u53e4\u62c9\u7c73\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 20.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u4f86\u81ea\u5fa9\u53e4\u4e16\u754c\u7684\u670b\u53cb\u5011\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u5fa9\u53e4\u840a\u91cc\u6a21\u578b\", \"\u8840\": 20.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u4f86\u81ea\u5fa9\u53e4\u4e16\u754c\u7684\u670b\u53cb\u5011\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u5fa9\u53e4\u5361\u5854\u723e\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": 20.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u4f86\u81ea\u5fa9\u53e4\u4e16\u754c\u7684\u670b\u53cb\u5011\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u7a00\u539f\u5de5\u7a0b\u5e2b\u7684\u5718\u9ad4\u7814\u7a76\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 10.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 8.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u7a00\u539f\u5de5\u7a0b\u5e2b\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u7a00\u539f\u5de5\u7a0b\u5e2b\u7684\u7814\u7a76\u5ba4\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 10.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 3.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u7a00\u539f\u5de5\u7a0b\u5e2b\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u7a00\u539f\u5de5\u7a0b\u5e2b\u7684\u5de5\u4f5c\u66f8\u684c\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 10.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.06, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u7a00\u539f\u5de5\u7a0b\u5e2b\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u9ec3\u8272\u661f\u661f\u7cd6\u5143\u7d20\u4e4b\u9b42\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 8.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u540c\u53f3\", \"\u53f0\u670d\": \"\u5be6\u73fe\u5fc3\u9858\u7684\u661f\u661f\u7cd6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u85cd\u8272\u661f\u661f\u7cd6\u5143\u7d20\u4e4b\u9b42\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 8.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u540c\u53f3\", \"\u53f0\u670d\": \"\u5be6\u73fe\u5fc3\u9858\u7684\u661f\u661f\u7cd6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7c89\u7d05\u8272\u661f\u661f\u7cd6\u5143\u7d20\u4e4b\u9b42\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 8.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u540c\u53f3\", \"\u53f0\u670d\": \"\u5be6\u73fe\u5fc3\u9858\u7684\u661f\u661f\u7cd6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6df1\u6df5\u7684\u73e0\u5b50\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 7.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": 0.01, \"\u66b4\u64ca\u50b7\u5bb3\": 0.02, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5580\u8f2a\u5df4\u65af\u66f4\u65b0\u7d00\u5ff5\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5718\u9577\u4e9e\u7279\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 8.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": 0.01, \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u7409\u7483\u9472\u908a\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u53e4\u5178\u5973\u50d5\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5be9\u554f\u5b98\u9edb\u4f0a\u723e\u5e03\u62c9\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 10.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 3.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u7409\u7483\u9472\u908a\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u53e4\u5178\u5973\u50d5\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6691\u5047(1)\", \"\u8840\": \"\", \"\u9b54\": 5.0, \"\u8010\": 5.0, \"\u529b\": \"\", \"\u667a\": 1.0, \"\u654f\": 2.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6691\u5047\u6d3b\u52d5\", \"\u53f0\u670d\": \"2022 \u514b\u8afe\u65af\u6c99\u7058\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6691\u5047(2)\", \"\u8840\": \"\", \"\u9b54\": 15.0, \"\u8010\": 15.0, \"\u529b\": \"\", \"\u667a\": 5.0, \"\u654f\": 5.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6691\u5047\u6d3b\u52d5\", \"\u53f0\u670d\": \"2022 \u514b\u8afe\u65af\u6c99\u7058\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6691\u5047(3)\", \"\u8840\": \"\", \"\u9b54\": 35.0, \"\u8010\": 35.0, \"\u529b\": \"\", \"\u667a\": 10.0, \"\u654f\": 9.0, \"\u610f\": \"\", \"\u5e78\": 10.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 1.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6691\u5047\u6d3b\u52d5\", \"\u53f0\u670d\": \"2022 \u514b\u8afe\u65af\u6c99\u7058\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u5fc3\u82b1\u6735\u6735\u958b\u99ac\u8eca\", \"\u8840\": 10.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 5.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": 3.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5c24\u8389\u7684\u60c5\u4eba\u7bc0\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u5fc3\u82b1\u6735\u6735\u958b\u6905\u5b50\", \"\u8840\": \"\", \"\u9b54\": 10.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 5.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": 3.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5c24\u8389\u7684\u60c5\u4eba\u7bc0\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5fc3\u82b1\u6735\u6735\u958b(2)\", \"\u8840\": 10.0, \"\u9b54\": 10.0, \"\u8010\": \"\", \"\u529b\": 5.0, \"\u667a\": 5.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 6.0, \"\u9b54\u653b\": 6.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u5c24\u8389\u7684\u60c5\u4eba\u7bc0\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u9748\u5de7\u7684\u5982\u610f\u73e0\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 8.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.04, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u9f8d\u4e4b\u5b88\u8b77\u8005\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u65b7\u9f8d\u528d\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 8.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.04, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u9f8d\u4e4b\u5b88\u8b77\u8005\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u809a\u5b50\u9913\u7684\u718a\u8c93\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 20.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\", \"\u53f0\u670d\": \"\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u61f6\u6d0b\u6d0b\u7684\u718a\u8c93\u6a21\u578b\", \"\u8840\": 20.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\", \"\u53f0\u670d\": \"\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6253\u778c\u7761\u7684\u718a\u8c93\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": 20.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\", \"\u53f0\u670d\": \"\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u827e\u9054\u723e\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 5.0, \"\u5e78\": 5.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u8389\u8389\u7d72\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7d05\u8272\u6668\u661f\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 4.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6668\u661f\u6a21\u578b\u7372\u5f97\u7bb1\u5b50(2)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6a58\u8272\u6668\u661f\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 4.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6668\u661f\u6a21\u578b\u7372\u5f97\u7bb1\u5b50(2)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u9ec3\u8272\u6668\u661f\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.02, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6668\u661f\u6a21\u578b\u7372\u5f97\u7bb1\u5b50(2)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7da0\u8272\u6668\u661f\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": 0.01, \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6668\u661f\u6a21\u578b\u7372\u5f97\u7bb1\u5b50(2)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u85cd\u8272\u6668\u661f\u6a21\u578b\", \"\u8840\": 20.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6668\u661f\u6a21\u578b\u7372\u5f97\u7bb1\u5b50(1)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6df1\u85cd\u6668\u661f\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": 20.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6668\u661f\u6a21\u578b\u7372\u5f97\u7bb1\u5b50(1)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u7d2b\u8272\u6668\u661f\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 20.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6668\u661f\u6a21\u578b\u7372\u5f97\u7bb1\u5b50(1)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u767d\u8272\u6668\u661f\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 3.0, \"\u667a\": 3.0, \"\u654f\": 3.0, \"\u610f\": 3.0, \"\u5e78\": 3.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6668\u661f\u6a21\u578b\u7372\u5f97\u7bb1\u5b50(1)\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u5361\u8587\u5a1c\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 12.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 9.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.07, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u95c7\u5f71\u6536\u5272\u8005\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u73e0\u5bf6\u541b\u4e3b\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6b50\u54c8\u5fb7\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": 50.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 12.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 4.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u95c7\u5f71\u6536\u5272\u8005\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u73e0\u5bf6\u541b\u4e3b\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u96f7\u7279\u6a21\u578b\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 7.0, \"\u667a\": \"\", \"\u654f\": 7.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u4f86\u81ea\u5fa9\u53e4\u4e16\u754c\u7684\u670b\u53cb\u5011 S2\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u6d1b\u7279\u6a21\u578b\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 7.0, \"\u654f\": \"\", \"\u610f\": 7.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u4f86\u81ea\u5fa9\u53e4\u4e16\u754c\u7684\u670b\u53cb\u5011 S2\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8ff7\u4f60\u7d2b\u85e4\u82b1\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"2020 \u9ede\u6578\u7c3d\u5230\", \"\u53f0\u670d\": \"2024\u4e2d\u79cb\u7bc0Ontime\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8ff7\u4f60\u6afb\u82b1\u88dd\u98fe\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 3.0, \"\u654f\": \"\", \"\u610f\": 2.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"2020 \u9ede\u6578\u7c3d\u5230\", \"\u53f0\u670d\": \"2024\u4e2d\u79cb\u7bc0Ontime\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u8299\u9732\u4e9e\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 7.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6ce2\u6d6a\u5b88\u8b77\u8005\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u611b\u723e\u7433\u4fe1\u5dee\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u51f1\u502b\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": 0.02, \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6ce2\u6d6a\u5b88\u8b77\u8005\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u611b\u723e\u7433\u4fe1\u5dee\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u8b8a\u7570\u7684\u5be6\u9a57\u9ad4\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": 0.02, \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6ce2\u6d6a\u5b88\u8b77\u8005\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u611b\u723e\u7433\u4fe1\u5dee\u7bb1\u5b50\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"_LT[xml.privatefarm.2560]\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 5.0, \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 5.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"2021 \u5be6\u73fe\u5fc3\u9858\u7684\u661f\u661f\u7cd6\", \"\u53f0\u670d\": \"\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"_LT[xml.privatefarm.2561]\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 5.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 5.0, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"2021 \u5be6\u73fe\u5fc3\u9858\u7684\u661f\u661f\u7cd6\", \"\u53f0\u670d\": \"\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"_LT[xml.privatefarm.2562]\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 5.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.02, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"2021 \u5be6\u73fe\u5fc3\u9858\u7684\u661f\u661f\u7cd6\", \"\u53f0\u670d\": \"\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"_LT[xml.privatefarm.2566](1)\", \"\u8840\": 10.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 1.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"2021 \u5be6\u73fe\u5fc3\u9858\u7684\u661f\u661f\u7cd6\", \"\u53f0\u670d\": \"\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"_LT[xml.privatefarm.2566](2)\", \"\u8840\": 14.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 3.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"2021 \u5be6\u73fe\u5fc3\u9858\u7684\u661f\u661f\u7cd6\", \"\u53f0\u670d\": \"\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"_LT[xml.privatefarm.2566](3)\", \"\u8840\": 20.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 5.0, \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": 0.01, \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"2021 \u5be6\u73fe\u5fc3\u9858\u7684\u661f\u661f\u7cd6\", \"\u53f0\u670d\": \"\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u6d3b\u52d5\u7684\u6cd5\u9ed8\u601d\u907a\u8de1\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 100.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6cd5\u9ed8\u601d\u907a\u8de1\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u9b54\u6cd5\u7684\u6cd5\u9ed8\u601d\u907a\u8de1\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": 100.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6cd5\u9ed8\u601d\u907a\u8de1\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u751f\u547d\u7684\u6cd5\u9ed8\u601d\u907a\u8de1\u6a21\u578b\", \"\u8840\": 100.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6cd5\u9ed8\u601d\u907a\u8de1\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u5fcd\u8010\u7684\u6cd5\u9ed8\u601d\u907a\u8de1\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": 1.0, \"\u9b54\u9632\": 1.0, \"\u4fdd\": 1.0, \"\u9b54\u4fdd\": 1.0, \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6cd5\u9ed8\u601d\u907a\u8de1\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u52c7\u6c23\u7684\u6cd5\u9ed8\u601d\u907a\u8de1\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": 2.0, \"\u9b54\u9632\": 2.0, \"\u4fdd\": 2.0, \"\u9b54\u4fdd\": 2.0, \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6cd5\u9ed8\u601d\u907a\u8de1\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u61a4\u6012\u7684\u6cd5\u9ed8\u601d\u907a\u8de1\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": 3.0, \"\u9b54\u9632\": 3.0, \"\u4fdd\": 3.0, \"\u9b54\u4fdd\": 3.0, \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u6cd5\u9ed8\u601d\u907a\u8de1\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u5361\u8389\u4e9e\u8d6b\u7684\u7d50\u754c\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": 0.01, \"\u5916\u670d\": \"\u683c\u502b\u8c9d\u723e\u7d0d \u975e\u5e38\u56f0\u96e3\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u611b\u723e\u7433\u4fe1\u5dee\u6a21\u578b(\u5973\u6027)\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 10.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": 3.0, \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u611b\u723e\u7433\u4fe1\u5dee\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u611b\u723e\u7433\u4fe1\u5dee\u6a21\u578b(\u7537\u6027)\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 10.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": 3.0, \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u611b\u723e\u7433\u4fe1\u5dee\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u7279\u6b8a\u5834\u666f\u5091\u4f5c Vol.1\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": 20.0, \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": 0.02, \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u611b\u723e\u7433\u4fe1\u5dee\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u7279\u6b8a\u5834\u666f\u5091\u4f5c Vol.2\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 18.0, \"\u984d\u5916\u50b7\u5bb3\": 0.02, \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u611b\u723e\u7433\u4fe1\u5dee\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8c93\u54aa\u6751\u838a(1)\", \"\u8840\": 25.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u8c93\u54aa\u6751\u838a\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8c93\u54aa\u6751\u838a(2)\", \"\u8840\": 25.0, \"\u9b54\": 25.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u8c93\u54aa\u6751\u838a\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}, {\"\u540d\u7a31\": \"\u8c93\u54aa\u6751\u838a(3)\", \"\u8840\": 25.0, \"\u9b54\": 25.0, \"\u8010\": 25.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u9632\": \"\", \"\u9b54\u9632\": \"\", \"\u4fdd\": \"\", \"\u9b54\u4fdd\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u66b4\u64ca\u4e0a\u9650\": \"\", \"\u5916\u670d\": \"\u8c93\u54aa\u6751\u838a\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 22\": \"\", \"Unnamed: 23\": \"\"}], \"\u7d20\u8cea(\u984d\u5916)\": [{\"\u540d\u7a31\": \"\u82b1\u6f3e\u5927\u5584\u4eba\u5996\u7cbe\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 5.0, \"\u654f\": 3.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u5b8c\u6210\u4fee\u5fa9\u827e\u7dad\u5361\u4e4b\u82b1\u4efb\u52d9\", \"\u53f0\u670d\": \"2017/11\u767b\u5165\u9001\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u82b1\u6f3e\u958b\u5fc3\u679c\u5996\u7cbe\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 3.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 3.0, \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u5b8c\u6210\u4fee\u5fa9\u62c9\u72c4\u5361\u4e4b\u82b1\u4efb\u52d9\", \"\u53f0\u670d\": \"2017/11\u767b\u5165\u9001\", \"Unnamed: 17\": \"\u8a2d\u7f6e\u6578\u91cf\u7121\u9650\u5236\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u5854\u863f\u7d72\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 6.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u7f8e\u9e97\u98a8\u666f\u7684\u9ede\u6ef4\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\u4f46\u540c\u7a2e\u7d20\u8cea\u53d6\u6700\u5927\u503c, \u53ef\u8207\u4e00\u822c(\u6c92extra)\u6a21\u578b, \u5c0f\u5c4b\u758a\u52a0\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u7279\u4f9d\u5948\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 6.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u7f8e\u9e97\u98a8\u666f\u7684\u9ede\u6ef4\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u611b\u4fee\u5361\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 6.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u7f8e\u9e97\u98a8\u666f\u7684\u9ede\u6ef4\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\u8a2d\u7f6e\", \"Unnamed: 18\": \"\u5973\u795e\u796d\u58c7*2(\u751f\u547d+20), \u5730\u4e0b\u57ce\u67f1\u5b50*1(\u751f\u547d+10, \u9b54\u529b+10)\"}, {\"\u540d\u7a31\": \"\u5361\u5c4b\u7d72\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 6.0, \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u767b\u5165\u7d2f\u7a4d\u6eff20\u5c0f\u6642\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"+\", \"Unnamed: 18\": \"\u7279\u4f9d\u5948\u4eba\u5f62\u6a21\u5076*2 (\u529b\u91cf +6), \u82b1\u6f3e\u958b\u5fc3\u679c\u5996\u7cbe*1 (\u529b\u91cf +3, \u5e78\u904b +3)\"}, {\"\u540d\u7a31\": \"\u7d22\u62c9\u7d72\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 6.0, \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u767b\u5165\u7d2f\u7a4d\u6eff20\u5c0f\u6642\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"+\", \"Unnamed: 18\": \"\u96f2\u6735\u5750\u588a(2\u968e\u6bb5)(\u751f\u547d+10, \u529b\u91cf+2) , \u548c\u99ac\u5ec4(2\u968e\u6bb5)(\u751f\u547d+15, \u610f\u5fd7+2)\"}, {\"\u540d\u7a31\": \"\u5967\u5e0c\u5fb7\u4eba\u5f62\u6a21\u5076\", \"\u8840\": 10.0, \"\u9b54\": 10.0, \"\u8010\": 10.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u767b\u5165\u7d2f\u7a4d\u6eff20\u5c0f\u6642\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"->\", \"Unnamed: 18\": \"\u4eba\u7269\u7d20\u8cea(\u751f\u547d+35, \u9b54\u529b+10, \u529b\u91cf+8, \u610f\u5fd7+2, \u5e78\u904b +3)\"}, {\"\u540d\u7a31\": \"\u5927\u904a\u884c\u6a02\u5718\u6258\u723e\u7dad\u65af\u81e8\u6642\u6f14\u54e1\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 6.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"14\u5468\u5e74\u734e\u52f5\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u5927\u904a\u884c\u6a02\u5718\u827e\u8587\u7433\u81e8\u6642\u6f14\u54e1\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 6.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"14\u5468\u5e74\u734e\u52f5\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"*\u7070\u5e95\u53f0\u670d\u672a\u5be6\u88dd\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u5927\u904a\u884c\u6a02\u5718\u4e9e\u7279\u81e8\u6642\u6f14\u54e1\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 6.0, \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"14\u5468\u5e74\u734e\u52f5\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u5927\u904a\u884c\u6a02\u5718\u7562\u5948\u81e8\u6642\u6f14\u54e1\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 6.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"14\u5468\u5e74\u734e\u52f5\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\u984d\u5916\u50b7\u5bb31%\u589e\u52a0, \u53ef\u8207\u5176\u4ed6\u589e\u50b7\u6548\u679c\u758a\u52a0\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u5927\u904a\u884c\u6a02\u5718\u5361\u8332\u9060\u81e8\u6642\u6f14\u54e1\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 6.0, \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"14\u5468\u5e74\u734e\u52f5\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\u984d\u5916\u50b7\u5bb31%\u589e\u52a0\u548c\u984d\u5916\u50b7\u5bb310%\u589e\u52a0 -> \u6700\u7d42\u50b7\u5bb3\u76841.11\u500d(\u6700\u5f8c\u50b7\u5bb3*(1+0.01+0.1))\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u5927\u904a\u884c\u6a02\u5718\u6d1b\u7dad\u6797\u81e8\u6642\u6f14\u54e1\u6a21\u578b\", \"\u8840\": 10.0, \"\u9b54\": 10.0, \"\u8010\": 10.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"14\u5468\u5e74\u734e\u52f5\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u96de\u86cb\u6a39\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 3.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 3.0, \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u734e\u91d1\u7375\u4eba\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u6c23\u7403\u6176\u5178\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u92fc\u88fd\u734e\u76c3\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u5922\u5e7b\u56de\u61b6\u7b2c1\u6b21\u96d9\u9031\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u9752\u9285\u734e\u76c3\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 5.0, \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u5922\u5e7b\u56de\u61b6\u7b2c2\u6b21\u96d9\u9031\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u9280\u88fd\u734e\u76c3\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.01, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u5922\u5e7b\u56de\u61b6\u7b2c3\u6b21\u96d9\u9031\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u9ec3\u91d1\u734e\u76c3\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 1.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u5922\u5e7b\u56de\u61b6\u7b2c4\u6b21\u96d9\u9031\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u4e9e\u591a\u5229\u723e\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 5.0, \"\u610f\": 5.0, \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"15\u9031\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u7948\u79b1\u4e2d\u7684\u8309\u9e97\u5b89\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 5.0, \"\u667a\": 5.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"15\u9031\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u5361\u6cf0\u723e\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.02, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u540c\u53f3\", \"\u53f0\u670d\": \"\u5bf5\u7269\u8a13\u7df4\u6311\u6230\u6d3b\u52d5\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u897f\u62c9\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": 4.0, \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u751c\u871c\u5b78\u9662\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u7e61\u7403\u82b1\u85cd\u8272\u7bb1\u5b50\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u60e1\u7fc5\u9b45\u9b54\u4e4b\u4e3b\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": 0.01, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u751c\u871c\u5b78\u9662\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u7e61\u7403\u82b1\u85cd\u8272\u7bb1\u5b50\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u5361\u6cf0\u723e\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.01, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u751c\u871c\u5b78\u9662\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u7e61\u7403\u82b1\u85cd\u8272\u7bb1\u5b50\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"16\u5468\u5e74\u5609\u5e74\u83ef\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": 2.0, \"\u9b54\u653b\": 2.0, \"\u66b4\u64ca\u50b7\u5bb3\": 0.02, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"16\u5468\u5e74\u7d00\u5ff5\u79ae\u7269\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u6885\u6eab\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 6.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.03, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u6211\u7684\u5922\u60f3\u662f\u5929\u6587\u5b78\u5bb6\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u6bd4\u53c8\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": 5.0, \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u8b80\u66f8\u6d3b\u52d5\", \"\u53f0\u670d\": \"2022 \u8b80\u66f8\u6d3b\u52d5\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u8a69\u53c8\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 2.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u8b80\u66f8\u6d3b\u52d5\", \"\u53f0\u670d\": \"2022 \u8b80\u66f8\u6d3b\u52d5\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u4f0a\u9b6f\u590f\u7684\u796d\u58c7\u7279\u5225\u6a21\u578b\", \"\u8840\": 13.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 2.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u5580\u8f2a\u5df4\u65af\u66f4\u65b0\u7d00\u5ff5\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u4f69\u6d1b\u59c6\u4eba\u5f62\u6a21\u5076\", \"\u8840\": 15.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.03, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u5580\u8f2a\u5df4\u65af\u66f4\u65b0\u7d00\u5ff5\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u5e03\u9e97\u723e\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": 5.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 6.0, \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u5580\u8f2a\u5df4\u65af\u66f4\u65b0\u7d00\u5ff5\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u5409\u62c9\u514b\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 7.0, \"\u667a\": \"\", \"\u654f\": 7.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u5580\u8f2a\u5df4\u65af\u66f4\u65b0\u7d00\u5ff5\u6d3b\u52d5\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u98db\u884c\u5e06\u8239\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.03, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u611b\u723e\u7433\u5546\u5718\u7d00\u5ff5\u54c1\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u838e\u4f0a\u8299\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 3.0, \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"\u611b\u723e\u7433\u5546\u5718\u7d00\u5ff5\u54c1\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u9999\u6c1b\u718a\u718a\u4eba\u5f62\u6a21\u5076\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": 3.0, \"\u9b54\u653b\": 3.0, \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": \"\", \"\u984d\u5916\u50b7\u5bb3\": 0.01, \"\u5916\u670d\": \"\u7b2c7\u500bNEXT\u7c73\u5217\u5e0c\u5b89\u7bb1\u5b50\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u661f\u661f\u7279\u5225\u6a21\u578b\", \"\u8840\": 11.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": 9.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": 5.0, \"\u5927\u50b7\": 6.0, \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.04, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": 0.02, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"2023 \u661f\u6cb3\u5782\u91e3\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u5ae9\u82bd\u7279\u5225\u6a21\u578b\", \"\u8840\": 10.0, \"\u9b54\": 11.0, \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 9.0, \"\u5e78\": 9.0, \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": 0.02, \"\u984d\u5916\u50b7\u5bb3\": 0.02, \"\u5916\u670d\": \"2023 \u661f\u6cb3\u5782\u91e3\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u6708\u4eae\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": 10.0, \"\u8010\": 11.0, \"\u529b\": \"\", \"\u667a\": 9.0, \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 6.0, \"\u66b4\u64ca\u50b7\u5bb3\": 0.04, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": 0.02, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"2023 \u661f\u6cb3\u5782\u91e3\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u96db\u83ca\u7279\u5225\u6a21\u578b\", \"\u8840\": 11.0, \"\u9b54\": \"\", \"\u8010\": 10.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 9.0, \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": 6.0, \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 4.0, \"\u79fb\u52d5\u901f\u5ea6\": 0.02, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"2023 \u661f\u6cb3\u5782\u91e3\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u8a2d\u7f6e\u56db\u8449\u5e78\u904b\u8349\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": \"\", \"\u8010\": 12.0, \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": 10.0, \"\u610f\": \"\", \"\u5e78\": 9.0, \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": 0.04, \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": 0.02, \"\u984d\u5916\u50b7\u5bb3\": 0.02, \"\u5916\u670d\": \"2024 \u661f\u6cb3\u5782\u91e3\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u9a5a\u559c\u79ae\u7269\u76d2\u7279\u5225\u6a21\u578b\", \"\u8840\": \"\", \"\u9b54\": 23.0, \"\u8010\": \"\", \"\u529b\": 10.0, \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": \"\", \"\u5e78\": \"\", \"\u5927\u50b7\": \"\", \"\u9b54\u653b\": 6.0, \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": 4.0, \"\u79fb\u52d5\u901f\u5ea6\": 0.02, \"\u984d\u5916\u50b7\u5bb3\": \"\", \"\u5916\u670d\": \"2024 \u661f\u6cb3\u5782\u91e3\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}, {\"\u540d\u7a31\": \"\u6d6a\u6f2b\u8fb2\u5834\u9583\u8000\u9b5a\u7db2\u7279\u5225\u6a21\u578b\", \"\u8840\": 23.0, \"\u9b54\": \"\", \"\u8010\": \"\", \"\u529b\": \"\", \"\u667a\": \"\", \"\u654f\": \"\", \"\u610f\": 10.0, \"\u5e78\": \"\", \"\u5927\u50b7\": 6.0, \"\u9b54\u653b\": \"\", \"\u66b4\u64ca\u50b7\u5bb3\": \"\", \"\u97f3\u6a02BUFF\": \"\", \"\u79fb\u52d5\u901f\u5ea6\": 0.02, \"\u984d\u5916\u50b7\u5bb3\": 0.02, \"\u5916\u670d\": \"2024 \u661f\u6cb3\u5782\u91e3\", \"\u53f0\u670d\": \"\u540c\u5de6\", \"Unnamed: 17\": \"\", \"Unnamed: 18\": \"\"}]}, \"sheetNames\": [\"\u7d20\u8cea\", \"\u7d20\u8cea(\u984d\u5916)\"]}");
-const META_IGNORE = new Set(["名稱","外服","台服"]);
-let activeSheet = DATA.sheetNames[0] || null;
-let mode = "name";
-let selectedAbilities = new Set();
-let logicMode = "AND";
-let filtered = [];
-let page = 1;
-
-function uniq(arr){ return Array.from(new Set(arr)); }
-function isTruthy(v){
-  if(v===null || v===undefined) return false;
-  if(typeof v === 'number') return v !== 0;
-  const s = String(v).trim();
-  if(s === "" || s === "0") return false;
-  return true;
-}
-function tokenize(q){ return q.trim().toLowerCase().split(/\s+/).filter(Boolean); }
-function rowHasAbilities(row, abilities, logicMode){
-  const checks = Array.from(abilities).map(ab => isTruthy(row[ab]));
-  if(abilities.size===0) return true;
-  return logicMode === "AND" ? checks.every(Boolean) : checks.some(Boolean);
-}
-function buildAbilityList(cols){
-  const pick = cols.filter(c => !META_IGNORE.has(c) && !/^Unnamed/i.test(c));
-  const chips = document.getElementById('abilityChips');
-  chips.innerHTML = "";
-  pick.forEach(c => {
-    const btn = document.createElement('div');
-    btn.className = 'chip';
-    btn.textContent = c;
-    btn.dataset.key = c;
-    btn.setAttribute('role','button');
-    btn.setAttribute('tabindex','0');
-    const toggle = () => {
-      if(selectedAbilities.has(c)) selectedAbilities.delete(c);
-      else selectedAbilities.add(c);
-      btn.classList.toggle('active');
-      update();
-    };
-    btn.addEventListener('click', toggle);
-    btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggle(); }});
-    chips.appendChild(btn);
-  });
-}
-function buildTable(rows){
-  if(!rows || rows.length===0) return '<div class="muted">沒有資料。</div>';
-  const allCols = Array.from(new Set(rows.flatMap(r => Object.keys(r))));
-  const commonCols = allCols.filter(c => c==="名稱" || selectedAbilities.has(c)).concat(
-    allCols.filter(c => !META_IGNORE.has(c) && !selectedAbilities.has(c) && !/^Unnamed/i.test(c)).slice(0,6)
-  );
-  const cols = uniq(commonCols);
-  const head = '<tr>' + cols.map(c => `<th scope="col">${escapeHtml(c)}</th>`).join('') + '</tr>';
-  const body = rows.map(r => {
-    return '<tr>' + cols.map(c => {
-      const v = r[c] ?? '';
-      if(c!=="名稱" && isTruthy(v)){
-        return `<td><button class="ability" data-key="${escapeHtml(c)}" title="加入能力篩選">${escapeHtml(v)}</button></td>`;
-      }
-      return `<td>${escapeHtml(v)}</td>`;
-    }).join('') + '</tr>';
-  }).join('');
-  return `<table><thead>${head}</thead><tbody>${body}</tbody></table>`;
-}
-function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-
-function currentRows(){
-  const rows = DATA.sheets[activeSheet] || [];
-  if(mode === "name"){
-    const tokens = tokenize(document.getElementById('q').value);
-    return rows.filter(r => {
-      const joined = Object.values(r).map(v => (v===null||v===undefined?'':String(v))).join(' ').toLowerCase();
-      return tokens.every(t => joined.includes(t));
-    });
-  }else{
-    return rows.filter(r => rowHasAbilities(r, selectedAbilities, logicMode));
-  }
-}
-
-function update(){
-  filtered = currentRows();
-  page = 1;
-  render();
-}
-
-function render(){
-  const total = filtered.length;
-  const start = (page-1)*PAGE_SIZE;
-  const end = Math.min(start + PAGE_SIZE, total);
-  const pageRows = filtered.slice(start, end);
-  document.getElementById('tablewrap').innerHTML = buildTable(pageRows);
-  document.getElementById('stats').textContent = `${total} 筆`;
-  const maxp = Math.max(1, Math.ceil(total/PAGE_SIZE));
-  document.getElementById('pageinfo').textContent = `${page} / ${maxp}`;
-  document.getElementById('prev').disabled = page<=1;
-  document.getElementById('next').disabled = page>=maxp;
-  document.getElementById('pagejump').max = maxp;
-  document.getElementById('pagejump').value = page;
-
-  document.querySelectorAll('.ability').forEach(el => {
-    el.addEventListener('click', () => {
-      const key = el.dataset.key;
-      if(!key) return;
-      selectedAbilities.add(key);
-      document.querySelectorAll('.chip').forEach(ch => { if(ch.dataset.key===key) ch.classList.add('active'); });
-      if(mode!=='ability'){ document.getElementById('mode').value='ability'; setMode('ability'); }
-      update();
-    });
-  });
-}
-
-function setMode(m){
-  mode = m;
-  document.getElementById('nameBox').style.display = (m==='name') ? '' : 'none';
-  document.getElementById('abilityBox').style.display = (m==='ability') ? '' : 'none';
-  update();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const sheetSel = document.getElementById('sheet');
-  (DATA.sheetNames||[]).forEach(n => { const opt=document.createElement('option'); opt.value=n; opt.textContent=n; sheetSel.appendChild(opt); });
-  sheetSel.value = activeSheet || '';
-  sheetSel.addEventListener('change', e => {
-    activeSheet = e.target.value;
-    const rows = DATA.sheets[activeSheet] || [];
-    const cols = rows.length ? Object.keys(rows[0]) : [];
-    buildAbilityList(cols);
-    selectedAbilities.clear();
-    document.querySelectorAll('.chip').forEach(ch => ch.classList.remove('active'));
-    update();
-  });
-
-  document.getElementById('mode').addEventListener('change', e => setMode(e.target.value));
-  document.getElementById('q').addEventListener('input', () => { clearTimeout(window._timer); window._timer=setTimeout(update,180); });
-  document.getElementById('clear').addEventListener('click', () => {
-    document.getElementById('q').value = '';
-    selectedAbilities.clear();
-    document.querySelectorAll('.chip').forEach(ch => ch.classList.remove('active'));
-    update();
-  });
-  document.getElementById('logic').addEventListener('change', e => { logicMode = e.target.value; update(); });
-
-  document.getElementById('prev').addEventListener('click', () => { if(page>1){ page -= 1; render(); }});
-  document.getElementById('next').addEventListener('click', () => {
-    const maxp = Math.max(1, Math.ceil(filtered.length/PAGE_SIZE));
-    if(page < maxp){ page += 1; render(); }
-  });
-  document.getElementById('go').addEventListener('click', () => {
-    const maxp = Math.max(1, Math.ceil(filtered.length/PAGE_SIZE));
-    let to = parseInt(document.getElementById('pagejump').value || '1', 10);
-    if(Number.isNaN(to)) to = 1;
-    to = Math.min(Math.max(1, to), maxp);
-    if(to !== page){ page = to; render(); }
-  });
-
-  const rows0 = DATA.sheets[activeSheet] || [];
-  const cols0 = rows0.length ? Object.keys(rows0[0]) : [];
-  buildAbilityList(cols0);
-  update();
-});
-</script>
+  <script src="./data/farm-db.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
