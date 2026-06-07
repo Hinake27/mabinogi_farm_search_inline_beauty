@@ -1,7 +1,7 @@
 # 瑪奇農場娃娃能力值查詢
 
 這是一個靜態網頁工具，用來查詢瑪奇農場娃娃、模型、小屋、女神像等資料的能力值與來源。資料來源是 Excel 檔，透過 Python 腳本轉成前端可直接讀取的 JS 資料庫。
-
+引用資料: https://docs.google.com/spreadsheets/d/1pMq50iMxNeSVKb1gB6AMARclUHNqS-CkKrMAlUYYXLM/edit?pli=1&gid=0#gid=0
 ## 功能
 
 - 名稱與來源關鍵字搜尋
